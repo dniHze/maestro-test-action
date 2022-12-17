@@ -21,9 +21,10 @@ function toAbsoluteReportPath(report: string): string {
     // join and normalize with workdir
     absoluteReport = path.normalize(path.join(workfir, report))
   }
+  core.debug(`Report path: ${absoluteReport}`)
   // verify
   const parsedPath = path.parse(absoluteReport)
-  if (parsedPath.ext !== 'xml') {
+  if (parsedPath.ext !== '.xml') {
     throw Error(
       `Maestro generates JUnit reports using XML files. File extension ${parsedPath.ext} does not comply`
     )
