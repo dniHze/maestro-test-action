@@ -1,11 +1,28 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'maestro-test-action'
+description: 'Simple step to run Maestro tests with GitHub Actions'
+author: 'dniHze'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  flow:
+    required: false
+    description: 'Meastro flow or directory'
+  report:
+    required: false
+    description: 'JUnit report destination'
+    default: 'reports/maestro-test.xml'
+  env:
+    required: false
+    description: 'environment variables'
+    default: ''
+  version:
+    required: false
+    description: 'Maestro CLI version'
+    default: 'latest'
+outputs:
+  report:
+    description: 'JUnit test report'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+branding:
+  color: purple
+  icon: check-circle
