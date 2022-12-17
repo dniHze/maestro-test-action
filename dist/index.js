@@ -58,7 +58,9 @@ function findIdbInstallation() {
     return __awaiter(this, void 0, void 0, function* () {
         const result = { found: false, path: '' };
         core.info('Checking if idb already installed');
-        const whichResult = yield exec.getExecOutput('which', ['idb_companion']);
+        const whichResult = yield exec.getExecOutput('which', ['idb_companion'], {
+            ignoreReturnCode: true
+        });
         if (whichResult.exitCode === 0) {
             core.info('idb_companion is already installed on a system level');
             result.found = true;
@@ -201,7 +203,9 @@ function findMaestroInstallation() {
             core.addPath(MAESTRO_BIN);
         }
         else {
-            const whichResult = yield exec.getExecOutput('which', ['maestro']);
+            const whichResult = yield exec.getExecOutput('which', ['maestro'], {
+                ignoreReturnCode: true
+            });
             if (whichResult.exitCode === 0) {
                 core.info('Found maestro system level installation');
                 result.found = true;

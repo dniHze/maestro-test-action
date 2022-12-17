@@ -56,7 +56,9 @@ async function findMaestroInstallation(): Promise<{
     core.info('Adding maestro to path')
     core.addPath(MAESTRO_BIN)
   } else {
-    const whichResult = await exec.getExecOutput('which', ['maestro'])
+    const whichResult = await exec.getExecOutput('which', ['maestro'], {
+      ignoreReturnCode: true
+    })
     if (whichResult.exitCode === 0) {
       core.info('Found maestro system level installation')
       result.found = true

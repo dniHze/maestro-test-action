@@ -24,7 +24,9 @@ async function findIdbInstallation(): Promise<{
 }> {
   const result = {found: false, path: ''}
   core.info('Checking if idb already installed')
-  const whichResult = await exec.getExecOutput('which', ['idb_companion'])
+  const whichResult = await exec.getExecOutput('which', ['idb_companion'], {
+    ignoreReturnCode: true
+  })
   if (whichResult.exitCode === 0) {
     core.info('idb_companion is already installed on a system level')
     result.found = true
