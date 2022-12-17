@@ -8,7 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - run: |
@@ -24,12 +27,11 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
       - uses: ./
-        with:
-          version: latest
       - uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
           arch: x86_64
+          ram-size: 2048M
           target: google_apis
           profile: Nexus 5
           script: maestro test --format=junit --output=reports/test.xml --no-ansi .maestro/android-contacts.yaml
