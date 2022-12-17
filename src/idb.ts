@@ -11,7 +11,7 @@ const HOME = os.homedir()
 const IDB_HOME = path.join(HOME, '.idb')
 const IDB_NAME = 'idb-companion'
 const IDB_VERSION = '1.1.8'
-const idbDownloadUrl = `https://github.com/facebook/idb/releases/latest/v${IDB_VERSION}/idb-companion.universal.tar.gz`
+const idbDownloadUrl = `https://github.com/facebook/idb/releases/download/v${IDB_VERSION}/idb-companion.universal.tar.gz`
 
 function idbExec(binPath: string): string {
   return path.join(binPath, 'idb_companion')
