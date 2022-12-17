@@ -1,0 +1,16 @@
+appId: com.android.contacts
+---
+- launchApp
+- tapOn: "Create new contact"
+- runFlow:
+    when:
+      visible: "ADD ACCOUNT"
+    file: subflows/dismiss-dialog.yaml
+- tapOn: "First name"
+- inputRandomPersonName
+- tapOn: "Last name"
+- inputRandomPersonName
+- tapOn: "Phone"
+- inputRandomNumber:
+    length: 10
+- tapOn: "Save"

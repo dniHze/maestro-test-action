@@ -1,11 +1,34 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'maestro-test-action'
+description: 'Simple step to run Maestro tests with GitHub Actions'
+author: 'dniHze'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  env:
+    required: false
+    description: 'Meastro environment variables, support'
+    default: ''
+  flow:
+    required: false
+    description: 'Meastro flow or directory'
+  report:
+    required: false
+    description: 'JUnit report destination'
+    default: 'maestro/reports/test.xml'
+  screenshots-dir:
+    required: false
+    description: 'Relative or absolute path to where screenshots should be stored'
+    default: 'maestro/screenshots'
+  version:
+    required: false
+    description: 'Maestro CLI version'
+    default: 'latest'
+outputs:
+  report:
+    description: 'Absolute path to JUnit test report'
+  screenshots-dir:
+    description: 'Absolute path to maestro screenshots placements'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+branding:
+  color: white
+  icon: check-circle
