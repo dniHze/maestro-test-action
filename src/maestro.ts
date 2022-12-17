@@ -94,8 +94,9 @@ export async function install(): Promise<string> {
     core.info('Unzipping maestro')
     const maestroExtractionLocation = await tc.extractZip(maestroToolZip)
     const maestroDir = path.join(maestroExtractionLocation, 'maestro')
-    core.info('Moving maestro to home dir')
+    core.debug(`Moving maestro distr from ${maestroDir} to ${MAESTRO_HOME}`)
     fse.moveSync(maestroDir, MAESTRO_HOME)
+    core.debug(`Removing ${maestroDir}`)
     fse.removeSync(maestroDir)
     core.info('Adding maestro to path')
     core.addPath(maestroPath)
@@ -118,6 +119,7 @@ export async function run(
   }
   params.push('--format=junit')
   params.push(`--output=${report}`)
+  params.push(`--no-ansi`)
   params.push(flow)
   return await exec.exec(execPath, params)
 }

@@ -96,7 +96,9 @@ function install() {
             core.info('Untaring idb_companion');
             const idbExtractedLocation = yield tc.extractTar(idbToolTar);
             const idbDir = path.join(idbExtractedLocation, 'idb-companion.universal');
+            core.debug(`Moving idb_companion distr from ${idbDir} to ${IDB_HOME}`);
             fse.moveSync(idbDir, IDB_HOME);
+            core.debug(`Remvoing ${idbDir}`);
             fse.removeSync(idbDir);
             core.info('Adding idb_companion to path');
             core.addPath(idbPath);
@@ -241,8 +243,9 @@ function install() {
             core.info('Unzipping maestro');
             const maestroExtractionLocation = yield tc.extractZip(maestroToolZip);
             const maestroDir = path.join(maestroExtractionLocation, 'maestro');
-            core.info('Moving maestro to home dir');
+            core.debug(`Moving maestro distr from ${maestroDir} to ${MAESTRO_HOME}`);
             fse.moveSync(maestroDir, MAESTRO_HOME);
+            core.debug(`Removing ${maestroDir}`);
             fse.removeSync(maestroDir);
             core.info('Adding maestro to path');
             core.addPath(maestroPath);
@@ -262,6 +265,7 @@ function run(execPath, envVariables, flow, report) {
         }
         params.push('--format=junit');
         params.push(`--output=${report}`);
+        params.push(`--no-ansi`);
         params.push(flow);
         return yield exec.exec(execPath, params);
     });
