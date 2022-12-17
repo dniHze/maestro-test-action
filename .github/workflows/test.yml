@@ -27,8 +27,10 @@ jobs:
         with:
           version: latest
       - run: |
+          brew install tree
+          tree /Users/runner/hostedtoolcache/maestro/1.17.4/x64
+          tree /Users/runner/hostedtoolcache/idb-companion/1.1.8/x64
           echo $PATH
-          maestro --version
       - uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
