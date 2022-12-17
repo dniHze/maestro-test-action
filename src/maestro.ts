@@ -42,8 +42,6 @@ async function findMaestroInstallation(version: string): Promise<SearchResult> {
   if (cachedMaestro.length !== 0) {
     result.found = true
     result.path = path.join(cachedMaestro, 'bin')
-    core.info('Adding maestro to path')
-    core.addPath(result.path)
   }
   return result
 }
@@ -97,11 +95,10 @@ export async function install(): Promise<string> {
       MAESTRO_NAME,
       version
     )
-    core.info('Adding maestro to path')
     maestroPath = path.join(cacheLocation, 'bin')
-    core.addPath(maestroPath)
     core.info('maestro succesffuly installed')
   }
+  core.addPath(maestroPath)
   core.endGroup()
   return maestroExec(maestroPath)
 }

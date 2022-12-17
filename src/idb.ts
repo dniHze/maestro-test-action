@@ -26,16 +26,6 @@ async function findIdbInstallation(): Promise<{
   if (idbPath.length !== 0) {
     result.found = true
     result.path = path.join(idbPath, 'bin')
-    core.addPath(result.path)
-  } else {
-    const whichResult = await exec.getExecOutput('which', ['idb_companion'], {
-      ignoreReturnCode: true
-    })
-    if (whichResult.exitCode === 0) {
-      core.info('idb_companion is already installed on a system level')
-      result.found = true
-      result.path = path.parse(whichResult.stdout).dir
-    }
   }
   return result
 }
@@ -60,9 +50,9 @@ export async function install(): Promise<string> {
       IDB_VERSION
     )
     idbPath = path.join(cachedPath, 'bin')
-    core.addPath(idbPath)
     core.info('idb_companion successfuly installed')
   }
+  core.addPath(idbPath)
   core.endGroup()
   return idbExec(idbPath)
 }

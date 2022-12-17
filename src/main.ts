@@ -46,11 +46,11 @@ async function run(): Promise<void> {
 
     if (process.platform === 'darwin') {
       const idbExec = await idb.install()
-      core.debug(`idb_companion path: ${idbExec}`)
+      core.debug(`idb_companion exec: ${idbExec}`)
     }
 
     const maestroExec = await maestro.install()
-    core.debug(`maestro path: ${maestroExec}`)
+    core.debug(`maestro exec: ${maestroExec}`)
     if (flow.length !== 0) {
       const result = await maestro.run(maestroExec, env, flow, report)
 

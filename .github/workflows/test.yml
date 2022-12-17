@@ -26,6 +26,9 @@ jobs:
       - uses: ./
         with:
           version: latest
+      - run: |
+          echo $PATH
+          maestro --version
       - uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31

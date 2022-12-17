@@ -62,17 +62,6 @@ function findIdbInstallation() {
         if (idbPath.length !== 0) {
             result.found = true;
             result.path = path.join(idbPath, 'bin');
-            core.addPath(result.path);
-        }
-        else {
-            const whichResult = yield exec.getExecOutput('which', ['idb_companion'], {
-                ignoreReturnCode: true
-            });
-            if (whichResult.exitCode === 0) {
-                core.info('idb_companion is already installed on a system level');
-                result.found = true;
-                result.path = path.parse(whichResult.stdout).dir;
-            }
         }
         return result;
     });
@@ -96,9 +85,9 @@ function install() {
             const idbExtractedLocation = yield tc.extractTar(idbToolTar, IDB_HOME);
             const cachedPath = yield tc.cacheDir(idbExtractedLocation, 'idb-companion', IDB_VERSION);
             idbPath = path.join(cachedPath, 'bin');
-            core.addPath(idbPath);
             core.info('idb_companion successfuly installed');
         }
+        core.addPath(idbPath);
         core.endGroup();
         return idbExec(idbPath);
     });
@@ -178,8 +167,6 @@ function findMaestroInstallation(version) {
         if (cachedMaestro.length !== 0) {
             result.found = true;
             result.path = path.join(cachedMaestro, 'bin');
-            core.info('Adding maestro to path');
-            core.addPath(result.path);
         }
         return result;
     });
@@ -229,11 +216,10 @@ function install() {
             core.info('Unzipping maestro');
             const maestroExtractionLocation = yield tc.extractZip(maestroToolZip, MAESTRO_HOME);
             const cacheLocation = yield tc.cacheDir(maestroExtractionLocation, MAESTRO_NAME, version);
-            core.info('Adding maestro to path');
             maestroPath = path.join(cacheLocation, 'bin');
-            core.addPath(maestroPath);
             core.info('maestro succesffuly installed');
         }
+        core.addPath(maestroPath);
         core.endGroup();
         return maestroExec(maestroPath);
     });
@@ -339,10 +325,10 @@ function run() {
             report = toAbsoluteReportPath(report);
             if (process.platform === 'darwin') {
                 const idbExec = yield idb.install();
-                core.debug(`idb_companion path: ${idbExec}`);
+                core.debug(`idb_companion exec: ${idbExec}`);
             }
             const maestroExec = yield maestro.install();
-            core.debug(`maestro path: ${maestroExec}`);
+            core.debug(`maestro exec: ${maestroExec}`);
             if (flow.length !== 0) {
                 const result = yield maestro.run(maestroExec, env, flow, report);
                 if (fs.existsSync(report)) {
