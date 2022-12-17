@@ -5,12 +5,22 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as fse from 'fs-extra'
 import * as os from 'os'
+import * as rm from 'typed-rest-client/RestClient'
 
 const MAESTRO_VERSION_REGEX = /[0-9]+\.[0-9]+.[0-9]+/g
 
 const HOME = os.homedir()
 const MAESTRO_HOME = path.join(HOME, '.maestro')
-const MAESTRO_BIN = path.join(MAESTRO_HOME, 'bin')
+const MAESTRO_NAME = 'maestro'
+
+interface Tag {
+  name: string
+}
+
+interface SearchResult {
+  found: boolean
+  path: string
+}
 
 function validateMaestroVersion(version: string): boolean {
   if (version === 'latest') return true
@@ -23,50 +33,37 @@ function maestroExec(binPath: string): string {
 }
 
 function maestroDownloadUrl(version: string): string {
-  if (version === 'latest') {
-    return 'https://github.com/mobile-dev-inc/maestro/releases/latest/download/maestro.zip'
-  } else {
-    return `https://github.com/mobile-dev-inc/maestro/releases/download/cli-${version}/maestro.zip`
-  }
+  return `https://github.com/mobile-dev-inc/maestro/releases/download/cli-${version}/maestro.zip`
 }
 
-async function resolveMaestroVersion(execPath: string): Promise<string> {
-  const output = await exec.getExecOutput(execPath, ['--version'])
-  if (output.exitCode === 0) {
-    const matches = output.stdout.match(MAESTRO_VERSION_REGEX)
-    // When maestro finds updates, it spills new version first, and then installed version
-    if (matches != null) {
-      return matches[matches.length - 1]
-    }
-  }
-  return ''
-}
-
-async function findMaestroInstallation(): Promise<{
-  found: boolean
-  path: string
-  version: string
-}> {
+async function findMaestroInstallation(version: string): Promise<SearchResult> {
   const result = {found: false, path: '', version: ''}
-  if (fs.existsSync(maestroExec(MAESTRO_BIN))) {
-    core.info('Local maestro installation found')
+  const cachedMaestro = tc.find(MAESTRO_NAME, version)
+  if (cachedMaestro.length !== 0) {
     result.found = true
-    result.path = MAESTRO_BIN
-    result.version = await resolveMaestroVersion(maestroExec(MAESTRO_BIN))
+    result.path = path.join(cachedMaestro, 'bin')
     core.info('Adding maestro to path')
-    core.addPath(MAESTRO_BIN)
-  } else {
-    const whichResult = await exec.getExecOutput('which', ['maestro'], {
-      ignoreReturnCode: true
-    })
-    if (whichResult.exitCode === 0) {
-      core.info('Found maestro system level installation')
-      result.found = true
-      result.path = path.parse(whichResult.stdout).dir
-      result.version = await resolveMaestroVersion(whichResult.stdout)
-    }
+    core.addPath(result.path)
   }
   return result
+}
+
+async function getLatestMaestroVersion(): Promise<string> {
+  let version = ''
+  const client = new rm.RestClient('github', 'https://api.github.com')
+  const response = await client.get<Tag[]>('/repos/mobile-dev-inc/maestro/tags')
+  if (response.statusCode === 200 && response.result !== null) {
+    const latestTag = response.result[0].name
+    const matchResult = latestTag.match(MAESTRO_VERSION_REGEX)
+    if (matchResult !== null) {
+      version = matchResult[0]
+    } else {
+      throw Error(
+        `Failed to get latest maestro version: {status: "${response.statusCode}"}`
+      )
+    }
+  }
+  return version
 }
 
 export async function install(): Promise<string> {
@@ -77,14 +74,13 @@ export async function install(): Promise<string> {
   if (!validateMaestroVersion(version)) {
     throw Error('Invalid version requested')
   }
-
+  if (version === 'latest') {
+    version = await getLatestMaestroVersion()
+  }
   core.startGroup('Installing maestro')
-  const existingInstall = await findMaestroInstallation()
-  let maestroPath = MAESTRO_BIN
-  if (
-    existingInstall.found &&
-    (version === 'latest' || existingInstall.version === version)
-  ) {
+  const existingInstall = await findMaestroInstallation(version)
+  let maestroPath = ''
+  if (existingInstall.found) {
     maestroPath = existingInstall.path
   } else {
     if (fs.existsSync(MAESTRO_HOME)) fse.removeSync(MAESTRO_HOME)
@@ -92,13 +88,17 @@ export async function install(): Promise<string> {
     core.info(`Downloading maestro ${version}`)
     const maestroToolZip = await tc.downloadTool(maestroDownloadUrl(version))
     core.info('Unzipping maestro')
-    const maestroExtractionLocation = await tc.extractZip(maestroToolZip)
-    const maestroDir = path.join(maestroExtractionLocation, 'maestro')
-    core.debug(`Moving maestro distr from ${maestroDir} to ${MAESTRO_HOME}`)
-    fse.moveSync(maestroDir, MAESTRO_HOME)
-    core.debug(`Removing ${maestroDir}`)
-    fse.removeSync(maestroDir)
+    const maestroExtractionLocation = await tc.extractZip(
+      maestroToolZip,
+      MAESTRO_HOME
+    )
+    const cacheLocation = await tc.cacheDir(
+      maestroExtractionLocation,
+      MAESTRO_NAME,
+      version
+    )
     core.info('Adding maestro to path')
+    maestroPath = path.join(cacheLocation, 'bin')
     core.addPath(maestroPath)
     core.info('maestro succesffuly installed')
   }
