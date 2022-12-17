@@ -45,7 +45,7 @@ export async function install(): Promise<string> {
     await exec.exec('ls', [idbToolTar])
     const idbExtractedLocation = await tc.extractTar(idbToolTar, IDB_HOME)
     const cachedPath = await tc.cacheDir(
-      idbExtractedLocation,
+      path.join(idbExtractedLocation, 'idb-companion.universal'),
       'idb-companion',
       IDB_VERSION
     )

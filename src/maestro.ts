@@ -5,17 +5,13 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as fse from 'fs-extra'
 import * as os from 'os'
-import * as rm from 'typed-rest-client/RestClient'
+import * as api from './api'
 
 const MAESTRO_VERSION_REGEX = /[0-9]+\.[0-9]+.[0-9]+/g
 
 const HOME = os.homedir()
 const MAESTRO_HOME = path.join(HOME, '.maestro')
 const MAESTRO_NAME = 'maestro'
-
-interface Tag {
-  name: string
-}
 
 interface SearchResult {
   found: boolean
@@ -46,24 +42,6 @@ async function findMaestroInstallation(version: string): Promise<SearchResult> {
   return result
 }
 
-async function getLatestMaestroVersion(): Promise<string> {
-  let version = ''
-  const client = new rm.RestClient('github', 'https://api.github.com')
-  const response = await client.get<Tag[]>('/repos/mobile-dev-inc/maestro/tags')
-  if (response.statusCode === 200 && response.result !== null) {
-    const latestTag = response.result[0].name
-    const matchResult = latestTag.match(MAESTRO_VERSION_REGEX)
-    if (matchResult !== null) {
-      version = matchResult[0]
-    } else {
-      throw Error(
-        `Failed to get latest maestro version: {status: "${response.statusCode}"}`
-      )
-    }
-  }
-  return version
-}
-
 export async function install(): Promise<string> {
   let version: string = core.getInput('version')
   if (version.length === 0) {
@@ -73,7 +51,7 @@ export async function install(): Promise<string> {
     throw Error('Invalid version requested')
   }
   if (version === 'latest') {
-    version = await getLatestMaestroVersion()
+    version = await api.getLatestMaestroVersion()
   }
   core.startGroup('Installing maestro')
   const existingInstall = await findMaestroInstallation(version)
@@ -91,7 +69,7 @@ export async function install(): Promise<string> {
       MAESTRO_HOME
     )
     const cacheLocation = await tc.cacheDir(
-      maestroExtractionLocation,
+      path.join(maestroExtractionLocation, 'maestro'),
       MAESTRO_NAME,
       version
     )
