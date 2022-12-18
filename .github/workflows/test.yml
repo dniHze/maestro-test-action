@@ -29,9 +29,8 @@ jobs:
       - uses: ./
       - uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
+          api-level: 29
           arch: x86_64
           ram-size: 2048M
-          target: google_apis
-          profile: Nexus 5
+          target: default
           script: maestro test --format=junit --output=reports/test.xml --no-ansi .maestro/android-contacts.yaml
