@@ -13,7 +13,7 @@ jobs:
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           npm install
       - run: |
@@ -21,7 +21,7 @@ jobs:
   android-test:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
@@ -34,3 +34,24 @@ jobs:
           ram-size: 2048M
           target: default
           script: maestro test --format=junit --output=report.xml --no-ansi .maestro/android-contacts.yaml
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: report
+          path: report.xml
+  ios-test:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: futureware-tech/simulator-action@v2
+        with:
+          model: 'iPhone 14 Pro'
+      - uses: ./
+        with:
+          flow: .maestro/ios-settings.yaml
+          report: report.xml
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: report
+          path: report.xml

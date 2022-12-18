@@ -1,0 +1,6 @@
+appId: com.apple.Preferences
+---
+- launchApp
+- tapOn: "General"
+- tapOn: "About"
+- assertVisible: "iOS Version"
