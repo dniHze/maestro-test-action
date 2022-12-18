@@ -34,7 +34,7 @@ jobs:
           ram-size: 2048M
           target: default
           script: maestro test --format=junit --output=report.xml --no-ansi .maestro/android-contacts.yaml
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
           name: report
@@ -50,7 +50,7 @@ jobs:
         with:
           flow: .maestro/ios-settings.yaml
           report: report.xml
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
           name: report
